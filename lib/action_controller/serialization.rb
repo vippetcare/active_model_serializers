@@ -60,7 +60,15 @@ module ActionController
     private
 
     def namespace_for_serializer
-      @namespace_for_serializer ||= self.class.parent unless self.class.parent == Object
+      @namespace_for_serializer ||= namespace_for_class(self.class) unless namespace_for_class(self.class) == Object
+    end
+
+    def namespace_for_class(klass)
+      if Module.method_defined?(:module_parent)
+        klass.module_parent
+      else
+        klass.parent
+      end
     end
 
     def default_serializer(resource)
@@ -88,7 +96,7 @@ module ActionController
         options[:scope] = serialization_scope unless options.has_key?(:scope)
 
         if resource.respond_to?(:to_ary)
-          options[:resource_name] = controller_name 
+          options[:resource_name] = controller_name
           options[:namespace] = namespace_for_serializer if namespace_for_serializer
         end
 
